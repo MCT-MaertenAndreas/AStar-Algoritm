@@ -12,11 +12,16 @@ class Maze(object):
         )
 
         self._accessible_nodes = 0
+        self._is_finished = False
         self._visited_nodes = []
 
     @property
     def accessible_nodes(self):
         return self._accessible_nodes
+
+    @property
+    def is_finished(self):
+        return self._is_finished
 
     def generate(self):
         self.nodes = [[MazeNode(self, x, y) for y in range(self.row_column_amount)] for x in range(self.row_column_amount)]
@@ -36,6 +41,8 @@ class Maze(object):
                 self._accessible_nodes += 1
 
                 self._visited_nodes.append(node)
-            if len(accessible_nodes) == 0 and len(self._visited_nodes) > 0:
+            if len(self._visited_nodes) == 0:
+                self._is_finished = True
+            elif len(accessible_nodes) == 0:
                 node = self._visited_nodes.pop()
 
