@@ -23,26 +23,19 @@ class MazeGUI(object):
         return self._canvas
 
     @property
+    def pixel_size(self):
+        return self._pixel_size
+
+    @property
     def window(self):
         return self._window
 
     def draw_node(self, node):
-        if node in self._canvas_objects:
-            self.canvas.delete(self._canvas_objects[node])
-
-        canvas_obj = self.canvas.create_rectangle(
-            node.x * self._pixel_size,
-            node.y * self._pixel_size,
-            node.x * self._pixel_size + self._pixel_size,
-            node.y * self._pixel_size + self._pixel_size,
-            fill = node.color
-        )
-
-        self._canvas_objects[node] = canvas_obj
+        node.draw(self.canvas, self.pixel_size)
 
     def draw_maze(self):
         for row in range(self._maze.row_column_amount):
             for column in range(self._maze.row_column_amount):
-                self.draw_node(self._maze.nodes[row][column])
+                self._maze.nodes[row][column].draw(self.canvas, self.pixel_size)
 
         self.window.mainloop()

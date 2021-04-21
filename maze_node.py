@@ -9,6 +9,8 @@ class MazeNode(object):
         self._is_wall = True
         self._neighbours = []
 
+        self._canvas_obj = None
+
     @property
     def x(self):
         return self._x
@@ -34,6 +36,18 @@ class MazeNode(object):
     @is_wall.setter
     def is_wall(self, value):
         self._is_wall = value
+
+    def draw(self, canvas, pixel_size):
+        if self._canvas_obj:
+            canvas.delete(self._canvas_obj)
+
+        self._canvas_obj = canvas.create_rectangle(
+            self.x * pixel_size,
+            self.y * pixel_size,
+            self.x * pixel_size + pixel_size,
+            self.y * pixel_size + pixel_size,
+            fill = self.color
+        )
 
     def get_accessible_nodes(self):
         neighbours = self.get_neighbouring()
