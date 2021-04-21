@@ -1,11 +1,39 @@
 class MazeNode(object):
     def __init__(self, maze, x, y):
-        self.maze = maze
+        self._maze = maze
 
-        self.x = x
-        self.y = y
+        self._x = x
+        self._y = y
 
+        self._color = None
+        self._is_wall = True
         self._neighbours = []
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def color(self):
+        if not self._color:
+            self._color = 'black' if self._is_wall else 'white'
+        return self._color
+
+    @color.setter
+    def color(self, value):
+        self._color = value
+
+    @property
+    def is_wall(self):
+        return self._is_wall
+
+    @is_wall.setter
+    def is_wall(self, value):
+        self._is_wall = value
 
     def get_accessible_nodes(self):
         neighbours = self.get_neighbouring()
@@ -13,9 +41,9 @@ class MazeNode(object):
         visitable_neighbours = []
         for node_group in neighbours:
             if (node_group[0] and node_group[0].x > 0
-            and node_group[0].x < self._row_column_size - 1
+            and node_group[0].x < self._maze.row_column_amount - 1
             and node_group[0].y > 0
-            and node_group[0].y < self._row_column_size - 1):
+            and node_group[0].y < self._maze.row_column_amount - 1):
                 if (node_group[1].is_wall
                 and node_group[2].is_wall
                 and node_group[3].is_wall
@@ -34,7 +62,7 @@ class MazeNode(object):
         return self._neighbours
 
     # Gets neigbouring nodes relative to the grid position of this one
-    def get_rel(self, x, y):
+    def get_rel(self, row, column):
         try:
             return self._maze.nodes[self._x + row][self._y + column]
         except:
