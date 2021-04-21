@@ -5,11 +5,25 @@ class MazeNode(object):
         self._x = x
         self._y = y
 
-        self._color = None
-        self._is_wall = True
-        self._neighbours = []
+        self._back_track = None
+        self._obj = None
+        self._has_backtrack = False
 
-        self._canvas_obj = None
+        self.f = 0
+        self.g = 0
+        self.h = 0
+        self.previous = None
+
+        self._pixel_size = maze.pixel_size
+        self._row_column_size = maze.row_column_amount
+
+        self.color = 'white'
+        self.neighbors = []
+        self.is_wall = True
+
+    @property
+    def position(self):
+        return (self._x, self._y)
 
     @property
     def x(self):
@@ -20,34 +34,46 @@ class MazeNode(object):
         return self._y
 
     @property
-    def color(self):
-        if not self._color:
-            self._color = 'black' if self._is_wall else 'white'
-        return self._color
-
-    @color.setter
-    def color(self, value):
-        self._color = value
-
-    @property
-    def is_wall(self):
-        return self._is_wall
-
-    @is_wall.setter
-    def is_wall(self, value):
-        self._is_wall = value
-
-    def draw(self, canvas, pixel_size):
-        if self._canvas_obj:
-            canvas.delete(self._canvas_obj)
-
-        self._canvas_obj = canvas.create_rectangle(
-            self.x * pixel_size,
-            self.y * pixel_size,
-            self.x * pixel_size + pixel_size,
-            self.y * pixel_size + pixel_size,
-            fill = self.color
+    def center(self):
+        return (
+            self.x * self._pixel_size + self._pixel_size // 2,
+            self.y * self._pixel_size + self._pixel_size // 2
         )
+
+    def draw(self, fill = None):
+        if self._obj:
+            if self._has_backtrack:
+                self._has_backtrack = False
+
+                self._maze.canvas.delete(self._back_track)
+            if fill == self._maze.canvas.itemcget(self._obj, 'fill'):
+                return
+            self._maze.canvas.delete(self._obj)
+
+        self._obj = self._maze.canvas.create_rectangle(
+            self._x * self._pixel_size,
+            self._y * self._pixel_size,
+            self._x * self._pixel_size + self._pixel_size,
+            self._y * self._pixel_size + self._pixel_size,
+            fill = fill if fill else 'black' if self.is_wall else self.color
+        )
+
+    def draw_line(self, **kwargs):
+        if self.previous:
+            prev_x, prev_y = self.previous.center
+            x, y = self.center
+
+            if self._back_track:
+                self._maze.canvas.delete(self._back_track)
+
+            self._has_backtrack = True
+            self._back_track = self._maze.canvas.create_line(
+                prev_x,
+                prev_y,
+                x,
+                y,
+                **kwargs
+            )
 
     def get_accessible_nodes(self):
         neighbours = self.get_neighbouring()
@@ -69,11 +95,11 @@ class MazeNode(object):
     def get_direct_neighbours(self):
         return [node_group[0] for node_group in self.get_neighbouring()]
 
-    # Get all neighbouring and their neigbours
+    # Get all direct neighbouring and their direct neigbours
     def get_neighbouring(self):
-        if len(self._neighbours) == 0:
+        if len(self.neighbors) == 0:
             self.update_neighboring_nodes()
-        return self._neighbours
+        return self.neighbors
 
     # Gets neigbouring nodes relative to the grid position of this one
     def get_rel(self, row, column):
@@ -83,7 +109,7 @@ class MazeNode(object):
             return None
 
     def update_neighboring_nodes(self):
-        self._neighbours = [
+        self.neighbors = [
             [self.get_rel(0, -1), self.get_rel(-1, -2), self.get_rel(0, -2), self.get_rel(1, -2), self.get_rel(-1, -1), self.get_rel(1, -1)], #left
             [self.get_rel(0, 1), self.get_rel(-1, 2), self.get_rel(0, 2), self.get_rel(1, 2), self.get_rel(-1, 1), self.get_rel(1, 1)], #right
             [self.get_rel(-1, 0), self.get_rel(-2, -1), self.get_rel(-2, 0), self.get_rel(-2, 1), self.get_rel(-1, -1), self.get_rel(-1, 1)], #top

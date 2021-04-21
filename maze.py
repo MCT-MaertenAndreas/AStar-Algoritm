@@ -1,9 +1,22 @@
-from maze_node import MazeNode
+import tkinter as tk
 from random import randint
+from maze_node import MazeNode
 
 class Maze(object):
-    def __init__(self, row_column_amount):
+    def __init__(self, row_column_amount, pixel_size):
         self.row_column_amount = row_column_amount
+        self.pixel_size = pixel_size
+
+        self.window = tk.Tk()
+        self.window.title("Maze")
+
+        self.canvas = tk.Canvas(
+            self.window,
+            width = pixel_size * row_column_amount,
+            height = pixel_size * row_column_amount,
+            bg = 'grey'
+        )
+        self.canvas.pack()
 
         # select a random starting point to start our maze generation
         self.start = (
@@ -22,6 +35,13 @@ class Maze(object):
     @property
     def is_finished(self):
         return self._is_finished
+
+    def draw_maze(self):
+        for row in range(self.row_column_amount):
+            for col in range(self.row_column_amount):
+                self.nodes[row][col].draw()
+
+        self.window.mainloop()
 
     def generate(self):
         self.nodes = [[MazeNode(self, x, y) for y in range(self.row_column_amount)] for x in range(self.row_column_amount)]

@@ -1,40 +1,44 @@
 from maze import Maze
-from maze_gui import MazeGUI
 from maze_solver import MazeSolver
+from tqdm import tqdm
 
-maze = Maze(row_column_amount = 50)
-maze_gui = MazeGUI(maze = maze, pixel_size = 15)
+pixel_size = 15
+
+maze = Maze(pixel_size = pixel_size, row_column_amount = 50)
+maze.generate()
+
 maze_solver = MazeSolver()
 
 def callback(e):
-    global maze, maze_gui, maze_solver
+    global maze, maze_solver
 
-    if not maze.is_finished or (maze_solver.start and maze_solver.end):
+    if maze_solver.start and maze_solver.end:
         return
 
-    node = maze.nodes[e.x // maze_gui.pixel_size][e.y // maze_gui.pixel_size]
+    node = maze.nodes[e.x // maze.pixel_size][e.y // maze.pixel_size]
     if node.is_wall:
         return
 
     if not maze_solver.start:
+        node.color = 'blue'
+        node.draw()
+
         maze_solver.start = node
 
-        node.color = 'blue'
-        maze_gui.draw_node(node)
-
         return
-
     node.color = 'green'
-    maze_gui.draw_node(node)
+    node.draw()
 
     maze_solver.end = node
 
-    # while maze_solver.step() == 0:
-    #     maze_solver.backtrack()
+    progress = tqdm(total = maze.accessible_nodes)
+    while maze_solver.step(True) == 0:
+        maze_solver.backtrack()
 
-    #     maze_gui.update()
+        maze.canvas.update()
 
-maze_gui.canvas.bind("<Button-1>", callback)
+        progress.update(1)
 
-maze.generate()
-maze_gui.draw_maze()
+maze.canvas.bind("<Button-1>", callback)
+
+maze.draw_maze()
