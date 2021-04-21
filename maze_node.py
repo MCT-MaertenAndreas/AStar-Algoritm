@@ -5,6 +5,8 @@ class MazeNode(object):
         self.x = x
         self.y = y
 
+        self._neighbours = []
+
     def get_accessible_nodes(self):
         neighbours = self.get_neighbouring()
 
@@ -27,12 +29,19 @@ class MazeNode(object):
 
     # Get all neighbouring and their neigbours
     def get_neighbouring(self):
-        if len(self.neighbors) == 0:
+        if len(self._neighbours) == 0:
             self.update_neighboring_nodes()
-        return self.neighbors
+        return self._neighbours
+
+    # Gets neigbouring nodes relative to the grid position of this one
+    def get_rel(self, x, y):
+        try:
+            return self._maze.nodes[self._x + row][self._y + column]
+        except:
+            return None
 
     def update_neighboring_nodes(self):
-        self.neighbors = [
+        self._neighbours = [
             [self.get_rel(0, -1), self.get_rel(-1, -2), self.get_rel(0, -2), self.get_rel(1, -2), self.get_rel(-1, -1), self.get_rel(1, -1)], #left
             [self.get_rel(0, 1), self.get_rel(-1, 2), self.get_rel(0, 2), self.get_rel(1, 2), self.get_rel(-1, 1), self.get_rel(1, 1)], #right
             [self.get_rel(-1, 0), self.get_rel(-2, -1), self.get_rel(-2, 0), self.get_rel(-2, 1), self.get_rel(-1, -1), self.get_rel(-1, 1)], #top
